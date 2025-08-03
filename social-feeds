@@ -1,0 +1,102 @@
+<?php
+/*
+Plugin Name: Social Feeds for Divi
+Description: Show social media feeds (Twitter, Facebook, Instagram, YouTube) with configurable links via WordPress admin.
+Version: 1.1
+Author: Saifullah Khalid | www.saifullahkhalid.com
+*/
+
+if (!defined('ABSPATH')) exit;
+
+// Register settings menu
+function sfd_create_menu() {
+    add_options_page(
+        'Social Feeds for Divi',
+        'Social Feeds',
+        'manage_options',
+        'sfd-social-feeds',
+        'sfd_settings_page'
+    );
+}
+add_action('admin_menu', 'sfd_create_menu');
+
+// Register settings
+function sfd_register_settings() {
+    register_setting('sfd_settings_group', 'sfd_twitter_url');
+    register_setting('sfd_settings_group', 'sfd_facebook_url');
+    register_setting('sfd_settings_group', 'sfd_instagram_url');
+    register_setting('sfd_settings_group', 'sfd_youtube_url');
+}
+add_action('admin_init', 'sfd_register_settings');
+
+// Settings page content
+function sfd_settings_page() {
+    ?>
+    <div class="wrap">
+        <h1>Social Feeds Settings</h1>
+        <form method="post" action="options.php">
+            <?php settings_fields('sfd_settings_group'); ?>
+            <?php do_settings_sections('sfd_settings_group'); ?>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">Twitter URL</th>
+                    <td><input type="text" name="sfd_twitter_url" value="<?php echo esc_attr(get_option('sfd_twitter_url')); ?>" size="50"/></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Facebook Page URL</th>
+                    <td><input type="text" name="sfd_facebook_url" value="<?php echo esc_attr(get_option('sfd_facebook_url')); ?>" size="50"/></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">Instagram Post URL</th>
+                    <td><input type="text" name="sfd_instagram_url" value="<?php echo esc_attr(get_option('sfd_instagram_url')); ?>" size="50"/></td>
+                </tr>
+                <tr valign="top">
+                    <th scope="row">YouTube Channel URL</th>
+                    <td><input type="text" name="sfd_youtube_url" value="<?php echo esc_attr(get_option('sfd_youtube_url')); ?>" size="50"/></td>
+                </tr>
+            </table>
+            <?php submit_button(); ?>
+        </form>
+    </div>
+    <?php
+}
+
+// Shortcodes
+function sfd_twitter_shortcode() {
+    $url = esc_url(get_option('sfd_twitter_url', 'https://twitter.com/TwitterDev'));
+    return '<a class="twitter-timeline" data-height="400" href="' . $url . '">Tweets by Profile</a>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>';
+}
+add_shortcode('twitter_feed', 'sfd_twitter_shortcode');
+
+function sfd_facebook_shortcode() {
+    $url = esc_url(get_option('sfd_facebook_url', 'https://www.facebook.com/facebook'));
+    return '<div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v17.0"></script>
+    <div class="fb-page" 
+        data-href="' . $url . '" 
+        data-tabs="timeline" 
+        data-width="" 
+        data-height="400" 
+        data-small-header="false" 
+        data-adapt-container-width="true" 
+        data-hide-cover="false" 
+        data-show-facepile="true">
+    </div>';
+}
+add_shortcode('facebook_feed', 'sfd_facebook_shortcode');
+
+function sfd_instagram_shortcode() {
+    $url = esc_url(get_option('sfd_instagram_url', 'https://www.instagram.com/p/CwV1o_fhVdz/'));
+    return '<blockquote class="instagram-media" data-instgrm-permalink="' . $url . '" data-instgrm-version="14" style=" background:#FFF; border:0; margin: 1px auto; max-width:540px; width:100%;">
+    </blockquote>
+    <script async src="//www.instagram.com/embed.js"></script>';
+}
+add_shortcode('instagram_feed', 'sfd_instagram_shortcode');
+
+function sfd_youtube_shortcode() {
+    $url = esc_url(get_option('sfd_youtube_url', 'https://www.youtube.com/user/YouTube'));
+    return '<iframe width="100%" height="400" src="https://www.youtube.com/embed?listType=user_uploads&list=' . basename($url) . '" 
+    title="YouTube channel feed" frameborder="0" allowfullscreen></iframe>';
+}
+add_shortcode('youtube_feed', 'sfd_youtube_shortcode');
